@@ -1757,7 +1757,7 @@ int i8080_regs_e(void) {
     return E;
 }
 
-int i8080_regs_H(void) {
+int i8080_regs_h(void) {
     return H;
 }
 
