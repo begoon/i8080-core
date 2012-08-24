@@ -108,7 +108,7 @@ Unfortunately, the current implementation needs the little-endian system
 to run properly. It uses unions to mix different data types, and such
 technique is not portable across little- and big-endian systems. Fortunately,
 most of popular desktop systems running Windows and OSX are based on Intel
-x86/64 which in little endian. Also, this emulator was tested on the PIC32
+x86/64 which is little endian. Also, this emulator was tested on the PIC32
 platform (little endian as well).
 
 
