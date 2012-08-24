@@ -1703,7 +1703,7 @@ static int i8080_execute(int opcode) {
             break;
 
         default:
-            cpu_cycles = -1;  /* Shouldn't be really be there. */
+            cpu_cycles = -1;  /* Shouldn't be really here. */
             break;
     }
     return cpu_cycles;
