@@ -267,7 +267,7 @@ static uns32 work32;
 static uns16 work16;
 static uns8 work8;
 static int index;
-static uns8 carry, add, sub;
+static uns8 carry, add;
 
 int parity_table[] = {
     1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
