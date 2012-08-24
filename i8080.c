@@ -311,8 +311,8 @@ static void i8080_store_flags(void) {
     if (P_FLAG) F |= F_PARITY;   else F &= ~F_PARITY;
     if (C_FLAG) F |= F_CARRY;    else F &= ~F_CARRY;
     F |= F_UN1;    // UN1_FLAG is always 1.
-    F &= ~F_UN3;   // UN1_FLAG is always 0.
-    F &= ~F_UN5;   // UN1_FLAG is always 0.
+    F &= ~F_UN3;   // UN3_FLAG is always 0.
+    F &= ~F_UN5;   // UN5_FLAG is always 0.
 }
 
 static void i8080_retrieve_flags(void) {
