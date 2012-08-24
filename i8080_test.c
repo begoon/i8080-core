@@ -58,7 +58,6 @@ void load_file(const char* name, unsigned char* load_to) {
 
 void execute_test(const char* filename, int success_check) {
     unsigned char* mem = i8080_hal_memory();
-    int last_pc = -1;
     int success = 0;
 
     memset(mem, 0, 0x10000);
