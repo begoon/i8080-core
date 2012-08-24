@@ -8,7 +8,7 @@ Intel 8080 called KR580VM80A manufactured in Russia.
 According to tests, this models works exactly the same way as the real
 KR580VM80A including vaguely documented or even undocumented features.
 The extensive "8080/8085 CPU Exerciser" test by Ian Bartholomew provides
-strong guarantee of the match.
+strong guarantees of the match.
 
 
 Build
