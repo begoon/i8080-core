@@ -13,7 +13,7 @@
 // Ian Bartholomew, 8080/8085 CPU Exerciser
 // http://www.idb.me.uk/sunhillow/8080.html
 //
-// Frank Cringle, The origianal exerciser for the Z80.
+// Frank Cringle, The original exerciser for the Z80.
 //
 // Thanks to zx.pk.ru and nedopc.org/forum communities.
 //
