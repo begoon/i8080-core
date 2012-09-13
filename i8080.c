@@ -911,12 +911,12 @@ static int i8080_execute(int opcode) {
             WR_BYTE(HL, L);
             break;
 
-        case 0x76:            /* mov m, m */
+        case 0x76:            /* hlt */
             cpu_cycles = 4;
             PC--;
             break;
 
-        case 0x77:            /* mov l, a */
+        case 0x77:            /* mov m, a */
             cpu_cycles = 7;
             WR_BYTE(HL, A);
             break;
