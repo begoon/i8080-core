@@ -144,4 +144,4 @@ Links
 
 * [Серия микросхем КР580][]
 
-[Серия микросхем КР580]: http://localhost/projects/radio86/info/kr580/
+[Серия микросхем КР580]: http://demin.ws/projects/radio86/info/kr580/
