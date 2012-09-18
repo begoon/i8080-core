@@ -137,3 +137,11 @@ Credits
 [8080/8085 CPU Exerciser]: http://www.idb.me.uk/sunhillow/8080.html
 [zx.pk.ru]: http://zx.pk.ru
 [nedopc.org/forum]: http://nedopc.org/forum
+
+
+Links
+=====
+
+* [Серия микросхем КР580][]
+
+[Серия микросхем КР580]: http://localhost/projects/radio86/info/kr580/
