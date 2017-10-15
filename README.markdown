@@ -115,7 +115,7 @@ platform (little endian as well).
 Usage
 =====
 
-The implemention of the Intel 8080 model is self-contained and independant.
+The implemention of the Intel 8080 model is self-contained and independent.
 It only requires the `i8080_hal.h` header providing the hardware abstraction
 layer.
 
