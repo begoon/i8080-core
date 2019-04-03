@@ -1,0 +1,9 @@
+language: c
+script: 
+  - make build run
+notifications:
+  email:
+    recipients:
+      - ademin@gmail.com
+    on_success: always
+    on_failure: always
