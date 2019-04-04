@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/begoon/i8080-core.svg?branch=master)](https://travis-ci.com/begoon/i8080-core)
+
 Intel 8080 (KR580VM80A) microprocessor core model
 =================================================
 
