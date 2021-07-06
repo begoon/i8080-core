@@ -1,4 +1,3 @@
-[![Travis CI](https://travis-ci.com/begoon/i8080-core.svg?branch=master)](https://travis-ci.com/begoon/i8080-core)
 [![GitHub Action](https://github.com/begoon/i8080-core/actions/workflows/build.yml/badge.svg)](https://github.com/begoon/i8080-core)
 
 
