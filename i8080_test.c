@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "i8080.h"
 #include "i8080_hal.h"
@@ -91,10 +92,15 @@ void execute_test(const char* filename, int success_check) {
     }
 }
 
-int main() {
-    execute_test("CPUTEST.COM", 0);
-    execute_test("TEST.COM", 0);
-    execute_test("8080PRE.COM", 1);
-    execute_test("8080EX1.COM", 0);
+int main()
+{
+    const time_t start = time(NULL);
+    execute_test("assets/CPUTEST.COM", 0);
+    execute_test("assets/TEST.COM", 0);
+    execute_test("assets/8080PRE.COM", 1);
+    execute_test("assets/8080EX1.COM", 0);
+    const time_t end = time(NULL);
+    printf("\n@ executed in %ld second(s)\n", end - start);
+
     return 0;
 }
