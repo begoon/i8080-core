@@ -23,3 +23,5 @@ run:
 
 clean:
 	-rm $(IMAGE)$(EXE)
+
+include Makefile.wasm

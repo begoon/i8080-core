@@ -1,0 +1,18 @@
+EMCC = emcc -O3
+
+wasm: build-wasm run-wasm
+
+build-wasm:
+	$(EMCC) --embed-file assets -o $(IMAGE).html $(FILES)
+
+run-wasm:
+	node $(IMAGE).js
+
+web-server:
+	python3 -m http.server
+
+run-web:
+	open http://localhost:8000/$(IMAGE).html
+
+clean-wasm:
+	-rm $(IMAGE).html $(IMAGE).js $(IMAGE).wasm

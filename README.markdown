@@ -120,6 +120,25 @@ layer.
 The example of use is the test suite (`i8080_test.c` and `i8080_hal.c`).
 It creates bare miminum hardware plumbing to run tests.
 
+WASM
+----
+
+The code can be also built on the WebAssembly platform using [emscripten][]:
+
+    make build-wasm
+
+Run WebAssembly test suite in the command line (`node` executable is required):
+
+    make run-node
+
+To run the test suite in the browser, start the local web server:
+
+    make web-browser
+
+In the browser, open the URL [http://localhost:8000/i8080_test.html](http://localhost:8000/i8080_test.html) or in another terminal run:
+
+    make run-web
+
 Credits
 -------
 
@@ -134,6 +153,7 @@ Credits
 [8080/8085 CPU Exerciser]: http://www.idb.me.uk/sunhillow/8080.html
 [zx.pk.ru]: http://zx.pk.ru
 [nedopc.org/forum]: http://nedopc.org/forum
+[emscripten]: https://emscripten.org/
 
 Links
 -----
