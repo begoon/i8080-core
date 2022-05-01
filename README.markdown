@@ -1,7 +1,7 @@
 Intel 8080 (KR580VM80A) microprocessor core model
 =================================================
 
-[![GitHub Action](https://github.com/begoon/i8080-core/actions/workflows/build.yml/badge.svg)](https://github.com/begoon/i8080-core)
+[![build](https://github.com/begoon/i8080-core/actions/workflows/build.yml/badge.svg)](https://github.com/begoon/i8080-core/actions/workflows/build.yml)
 
 This project is an abstract logic model of the Intel 8080 microprocessor
 written in C. To be more precise, this model replicates a clone of the original
