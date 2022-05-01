@@ -1,9 +1,7 @@
-[![GitHub Action](https://github.com/begoon/i8080-core/actions/workflows/build.yml/badge.svg)](https://github.com/begoon/i8080-core)
-
-
-
 Intel 8080 (KR580VM80A) microprocessor core model
 =================================================
+
+[![GitHub Action](https://github.com/begoon/i8080-core/actions/workflows/build.yml/badge.svg)](https://github.com/begoon/i8080-core)
 
 This project is an abstract logic model of the Intel 8080 microprocessor
 written in C. To be more precise, this model replicates a clone of the original
@@ -14,9 +12,8 @@ KR580VM80A including vaguely documented or even undocumented features.
 The extensive "8080/8085 CPU Exerciser" test by Ian Bartholomew provides
 strong guarantees of the match.
 
-
 Build
-=====
+-----
 
 Use any standard C compiler, for example, GNU C, Visual Studio or TCC. But
 the Makefile requires GNU Make.
@@ -81,9 +78,8 @@ the following:
     Tests complete
     Jump to 0000 from 0137
 
-
 Tests
-=====
+-----
 
 The test suite includes four tests at the moment:
 
@@ -95,18 +91,17 @@ The test suite includes four tests at the moment:
 
 * [8080/8085 CPU Exerciser][] by Ian Bartholomew and Frank Cringles
 
-  - The preliminary test (file `8080PRE.COM`).
-  - The basic excerciser (file `8080EX1.COM`). This file is a copy of the
-    vanilla `8080EXER.COM` file having CRCs from the real KR580VM80A 
+  * The preliminary test (file `8080PRE.COM`).
+  * The basic excerciser (file `8080EX1.COM`). This file is a copy of the
+    vanilla `8080EXER.COM` file having CRCs from the real KR580VM80A
     contributed by Alexander Timoshenko and Viacheslav Slavinsky.
 
 [8080/8085 CPU Exerciser]: http://www.idb.me.uk/sunhillow/8080.html
 
 All tests pass.
 
-
 Note
-====
+----
 
 Unfortunately, the current implementation needs the little-endian system
 to run properly. It uses unions to mix different data types, and such
@@ -115,9 +110,8 @@ most of popular desktop systems running Windows and OSX are based on Intel
 x86/64 which is little endian. Also, this emulator was tested on the PIC32
 platform (little endian as well).
 
-
 Usage
-=====
+-----
 
 The implemention of the Intel 8080 model is self-contained and independent.
 It only requires the `i8080_hal.h` header providing the hardware abstraction
@@ -126,9 +120,8 @@ layer.
 The example of use is the test suite (`i8080_test.c` and `i8080_hal.c`).
 It creates bare miminum hardware plumbing to run tests.
 
-
 Credits
-=======
+-------
 
 * Viacheslav Slavinsky, [Vector-06C FPGA Replica][]
 * Dmitry Tselikov, [Bashrikia-2M and Radio-86RK on Altera DE1][]
@@ -142,9 +135,8 @@ Credits
 [zx.pk.ru]: http://zx.pk.ru
 [nedopc.org/forum]: http://nedopc.org/forum
 
-
 Links
-=====
+-----
 
 * [Серия микросхем КР580][]
 
