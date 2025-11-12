@@ -7,7 +7,7 @@ build-wasm:
 	ls -al
 
 run-wasm:
-	node $(IMAGE).js
+	bun $(IMAGE).js
 
 web-server:
 	python3 -m http.server

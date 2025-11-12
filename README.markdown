@@ -127,7 +127,7 @@ The code can be also built on the WebAssembly platform using [emscripten][]:
 
     make build-wasm
 
-Run WebAssembly test suite in the command line (`node` executable is required):
+Run WebAssembly test suite in the command line (`bun` executable is required):
 
     make run-wasm
 
