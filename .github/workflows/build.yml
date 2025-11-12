@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v6
         with:
-          node-version: latest
-      - uses: mymindstorm/setup-emsdk
+          node-version: 24.x
+      - uses: mymindstorm/setup-emsdk@v14
       - run: make
       - run: make wasm
