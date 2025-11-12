@@ -129,7 +129,7 @@ The code can be also built on the WebAssembly platform using [emscripten][]:
 
 Run WebAssembly test suite in the command line (`node` executable is required):
 
-    make run-node
+    make run-wasm
 
 To run the test suite in the browser, start the local web server:
 
