@@ -1,4 +1,4 @@
-name: build
+name: build-wasm
 
 on:
   push:
@@ -11,4 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: make
+      - uses: mymindstorm/setup-emsdk@v14
+      - uses: oven-sh/setup-bun@v2
+      - run: make wasm
