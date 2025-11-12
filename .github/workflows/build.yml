@@ -12,6 +12,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: lovasoa/setup-emscripten@master
+      - uses: actions/setup-node@v6
+        with:
+          node-version: latest
+      - uses: mymindstorm/setup-emsdk
       - run: make
       - run: make wasm
