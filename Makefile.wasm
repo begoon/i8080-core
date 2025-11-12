@@ -3,7 +3,8 @@ EMCC = emcc -O3
 wasm: build-wasm run-wasm
 
 build-wasm:
-	$(EMCC) --embed-file assets -o $(IMAGE).html $(FILES)
+	$(EMCC) --embed-file assets -o $(IMAGE).html --minify 0 $(FILES)
+	ls -al
 
 run-wasm:
 	node $(IMAGE).js
