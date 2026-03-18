@@ -1,1 +1,6 @@
 go-git.cmd
+i8080_test
+.claude/settings.local.json
+i8080_test.wasm
+i8080_test.js
+i8080_test.html

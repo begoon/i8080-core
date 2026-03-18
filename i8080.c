@@ -34,94 +34,70 @@
 #include "i8080.h"
 #include "i8080_hal.h"
 
+typedef unsigned long int       u32;
+typedef signed char             s8;
+typedef signed short            s16;
+typedef signed long int         s32;
+
 #define RD_BYTE(addr) i8080_hal_memory_read_byte(addr)
 #define RD_WORD(addr) i8080_hal_memory_read_word(addr)
 
 #define WR_BYTE(addr, value) i8080_hal_memory_write_byte(addr, value)
 #define WR_WORD(addr, value) i8080_hal_memory_write_word(addr, value)
 
-typedef unsigned char           uns8;
-typedef unsigned short          uns16;
-typedef unsigned long int       uns32;
-typedef signed char             sgn8;
-typedef signed short            sgn16;
-typedef signed long int         sgn32;
+// Endian-independent register pair composition
+#define PAIR(hi, lo)          (((u16)(hi) << 8) | (u16)(lo))
+#define SET_PAIR(hi, lo, val) { u16 _v = (val); (hi) = (_v >> 8) & 0xff; (lo) = _v & 0xff; }
 
-typedef union {
-    struct {
-        uns8 l, h;
-    } b;
-    uns16 w;
-} reg_pair;
+// Individual register access
+#define FLAGS            cpu->f
+#define A                cpu->a
+#define F                cpu->flags
+#define B                cpu->b
+#define C                cpu->c
+#define D                cpu->d
+#define E                cpu->e
+#define H                cpu->h
+#define L                cpu->l
+#define SP               cpu->sp
+#define PC               cpu->pc
+#define IFF              cpu->iff
 
-typedef struct {
-    uns8 carry_flag;
-    uns8 unused1;
-    uns8 parity_flag;
-    uns8 unused3;
-    uns8 half_carry_flag;
-    uns8 unused5;
-    uns8 zero_flag;
-    uns8 sign_flag;
-} flag_reg;
+// Register pair read access
+#define AF               PAIR(A, F)
+#define BC               PAIR(B, C)
+#define DE               PAIR(D, E)
+#define HL               PAIR(H, L)
 
-struct i8080 {
-    flag_reg f;
-    reg_pair af, bc, de, hl;
-    reg_pair sp, pc;
-    uns16 iff;
-    uns16 last_pc;
-};
+#define F_CARRY          0x01
+#define F_UN1            0x02
+#define F_PARITY         0x04
+#define F_UN3            0x08
+#define F_HCARRY         0x10
+#define F_UN5            0x20
+#define F_ZERO           0x40
+#define F_NEG            0x80
 
-#define FLAGS           cpu.f
-#define AF              cpu.af.w
-#define BC              cpu.bc.w
-#define DE              cpu.de.w
-#define HL              cpu.hl.w
-#define SP              cpu.sp.w
-#define PC              cpu.pc.w
-#define A               cpu.af.b.h
-#define F               cpu.af.b.l
-#define B               cpu.bc.b.h
-#define C               cpu.bc.b.l
-#define D               cpu.de.b.h
-#define E               cpu.de.b.l
-#define H               cpu.hl.b.h
-#define L               cpu.hl.b.l
-#define HSP             cpu.sp.b.h
-#define LSP             cpu.sp.b.l
-#define HPC             cpu.pc.b.h
-#define LPC             cpu.pc.b.l
-#define IFF             cpu.iff
+#define C_FLAG           FLAGS.carry_flag
+#define P_FLAG           FLAGS.parity_flag
+#define H_FLAG           FLAGS.half_carry_flag
+#define Z_FLAG           FLAGS.zero_flag
+#define S_FLAG           FLAGS.sign_flag
+#define UN1_FLAG         FLAGS.unused1
+#define UN3_FLAG         FLAGS.unused3
+#define UN5_FLAG         FLAGS.unused5
 
-#define F_CARRY         0x01
-#define F_UN1           0x02
-#define F_PARITY        0x04
-#define F_UN3           0x08
-#define F_HCARRY        0x10
-#define F_UN5           0x20
-#define F_ZERO          0x40
-#define F_NEG           0x80
+#define SET(flag)        (flag = 1)
+#define CLR(flag)        (flag = 0)
+#define TST(flag)        (flag)
+#define CPL(flag)        (flag = !flag)
 
-#define C_FLAG          FLAGS.carry_flag
-#define P_FLAG          FLAGS.parity_flag
-#define H_FLAG          FLAGS.half_carry_flag
-#define Z_FLAG          FLAGS.zero_flag
-#define S_FLAG          FLAGS.sign_flag
-#define UN1_FLAG        FLAGS.unused1
-#define UN3_FLAG        FLAGS.unused3
-#define UN5_FLAG        FLAGS.unused5
-
-#define SET(flag)       (flag = 1)
-#define CLR(flag)       (flag = 0)
-#define TST(flag)       (flag)
-#define CPL(flag)       (flag = !flag)
-
-#define POP(reg)        { (reg) = RD_WORD(SP); SP += 2; }
-#define PUSH(reg)       { SP -= 2; WR_WORD(SP, (reg)); }
-#define RET()           { POP(PC); }
-#define STC()           { SET(C_FLAG); }
-#define CMC()           { CPL(C_FLAG); }
+#define POP(reg)         { (reg) = RD_WORD(SP); SP += 2; }
+#define POP_PAIR(hi, lo) { SET_PAIR(hi, lo, RD_WORD(SP)); SP += 2; }
+#define PUSH(val)        { SP -= 2; WR_WORD(SP, (val)); }
+#define RET()            { POP(PC); }
+#define STC()            { SET(C_FLAG); }
+#define CMC()            { CPL(C_FLAG); }
 
 #define INR(reg) \
 {                                               \
@@ -143,7 +119,7 @@ struct i8080 {
 
 #define ADD(val) \
 {                                               \
-    work16 = (uns16)A + (val);                  \
+    work16 = (u16)A + (val);                    \
     index = ((A & 0x88) >> 1) |                 \
             (((val) & 0x88) >> 2) |             \
             ((work16 & 0x88) >> 3);             \
@@ -157,7 +133,7 @@ struct i8080 {
 
 #define ADC(val) \
 {                                               \
-    work16 = (uns16)A + (val) + C_FLAG;         \
+    work16 = (u16)A + (val) + C_FLAG;           \
     index = ((A & 0x88) >> 1) |                 \
             (((val) & 0x88) >> 2) |             \
             ((work16 & 0x88) >> 3);             \
@@ -171,7 +147,7 @@ struct i8080 {
 
 #define SUB(val) \
 {                                                \
-    work16 = (uns16)A - (val);                   \
+    work16 = (u16)A - (val);                     \
     index = ((A & 0x88) >> 1) |                  \
             (((val) & 0x88) >> 2) |              \
             ((work16 & 0x88) >> 3);              \
@@ -185,7 +161,7 @@ struct i8080 {
 
 #define SBB(val) \
 {                                                \
-    work16 = (uns16)A - (val) - C_FLAG;          \
+    work16 = (u16)A - (val) - C_FLAG;            \
     index = ((A & 0x88) >> 1) |                  \
             (((val) & 0x88) >> 2) |              \
             ((work16 & 0x88) >> 3);              \
@@ -199,7 +175,7 @@ struct i8080 {
 
 #define CMP(val) \
 {                                                \
-    work16 = (uns16)A - (val);                   \
+    work16 = (u16)A - (val);                     \
     index = ((A & 0x88) >> 1) |                  \
             (((val) & 0x88) >> 2) |              \
             ((work16 & 0x88) >> 3);              \
@@ -242,8 +218,8 @@ struct i8080 {
 
 #define DAD(reg) \
 {                                               \
-    work32 = (uns32)HL + (reg);                 \
-    HL = work32 & 0xffff;                       \
+    work32 = (u32)HL + (reg);                   \
+    SET_PAIR(H, L, work32 & 0xffff);            \
     C_FLAG = ((work32 & 0x10000L) != 0);        \
 }
 
@@ -261,15 +237,7 @@ struct i8080 {
 
 #define PARITY(reg) parity_table[(reg)]
 
-static struct i8080 cpu;
-
-static uns32 work32;
-static uns16 work16;
-static uns8 work8;
-static int index;
-static uns8 carry, add;
-
-int parity_table[] = {
+static int parity_table[] = {
     1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
     0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
     0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
@@ -288,10 +256,10 @@ int parity_table[] = {
     1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
 };
 
-int half_carry_table[] = { 0, 0, 1, 0, 1, 0, 1, 1 };
-int sub_half_carry_table[] = { 0, 1, 1, 1, 0, 0, 0, 1 };
+static int half_carry_table[] = { 0, 0, 1, 0, 1, 0, 1, 1 };
+static int sub_half_carry_table[] = { 0, 1, 1, 1, 0, 0, 0, 1 };
 
-void i8080_init(void) {
+void i8080_init(i8080_state *cpu) {
     C_FLAG = 0;
     S_FLAG = 0;
     Z_FLAG = 0;
@@ -304,7 +272,7 @@ void i8080_init(void) {
     PC = 0xF800;
 }
 
-static void i8080_store_flags(void) {
+static void i8080_store_flags(i8080_state *cpu) {
     if (S_FLAG) F |= F_NEG;      else F &= ~F_NEG;
     if (Z_FLAG) F |= F_ZERO;     else F &= ~F_ZERO;
     if (H_FLAG) F |= F_HCARRY;   else F &= ~F_HCARRY;
@@ -315,7 +283,7 @@ static void i8080_store_flags(void) {
     F &= ~F_UN5;   // UN5_FLAG is always 0.
 }
 
-static void i8080_retrieve_flags(void) {
+static void i8080_retrieve_flags(i8080_state *cpu) {
     S_FLAG = F & F_NEG      ? 1 : 0;
     Z_FLAG = F & F_ZERO     ? 1 : 0;
     H_FLAG = F & F_HCARRY   ? 1 : 0;
@@ -323,8 +291,14 @@ static void i8080_retrieve_flags(void) {
     C_FLAG = F & F_CARRY    ? 1 : 0;
 }
 
-static int i8080_execute(int opcode) {
+static int i8080_execute(i8080_state *cpu, int opcode) {
     int cpu_cycles;
+    u32 work32;
+    u16 work16;
+    u8 work8;
+    int index;
+    u8 carry, add;
+
     switch (opcode) {
         case 0x00:            /* nop */
         // Undocumented NOP.
@@ -340,7 +314,7 @@ static int i8080_execute(int opcode) {
 
         case 0x01:            /* lxi b, data16 */
             cpu_cycles = 10;
-            BC = RD_WORD(PC);
+            SET_PAIR(B, C, RD_WORD(PC));
             PC += 2;
             break;
 
@@ -351,7 +325,7 @@ static int i8080_execute(int opcode) {
 
         case 0x03:            /* inx b */
             cpu_cycles = 5;
-            BC++;
+            SET_PAIR(B, C, BC + 1);
             break;
 
         case 0x04:            /* inr b */
@@ -387,7 +361,7 @@ static int i8080_execute(int opcode) {
 
         case 0x0B:            /* dcx b */
             cpu_cycles = 5;
-            BC--;
+            SET_PAIR(B, C, BC - 1);
             break;
 
         case 0x0C:            /* inr c */
@@ -413,7 +387,7 @@ static int i8080_execute(int opcode) {
 
         case 0x11:            /* lxi d, data16 */
             cpu_cycles = 10;
-            DE = RD_WORD(PC);
+            SET_PAIR(D, E, RD_WORD(PC));
             PC += 2;
             break;
 
@@ -424,7 +398,7 @@ static int i8080_execute(int opcode) {
 
         case 0x13:            /* inx d */
             cpu_cycles = 5;
-            DE++;
+            SET_PAIR(D, E, DE + 1);
             break;
 
         case 0x14:            /* inr d */
@@ -444,7 +418,7 @@ static int i8080_execute(int opcode) {
 
         case 0x17:            /* ral */
             cpu_cycles = 4;
-            work8 = (uns8)C_FLAG;
+            work8 = (u8)C_FLAG;
             C_FLAG = ((A & 0x80) != 0);
             A = (A << 1) | work8;
             break;
@@ -461,7 +435,7 @@ static int i8080_execute(int opcode) {
 
         case 0x1B:            /* dcx d */
             cpu_cycles = 5;
-            DE--;
+            SET_PAIR(D, E, DE - 1);
             break;
 
         case 0x1C:            /* inr e */
@@ -481,14 +455,14 @@ static int i8080_execute(int opcode) {
 
         case 0x1F:             /* rar */
             cpu_cycles = 4;
-            work8 = (uns8)C_FLAG;
+            work8 = (u8)C_FLAG;
             C_FLAG = A & 0x01;
             A = (A >> 1) | (work8 << 7);
             break;
 
         case 0x21:             /* lxi h, data16 */
             cpu_cycles = 10;
-            HL = RD_WORD(PC);
+            SET_PAIR(H, L, RD_WORD(PC));
             PC += 2;
             break;
 
@@ -500,7 +474,7 @@ static int i8080_execute(int opcode) {
 
         case 0x23:            /* inx h */
             cpu_cycles = 5;
-            HL++;
+            SET_PAIR(H, L, HL + 1);
             break;
 
         case 0x24:            /* inr h */
@@ -520,7 +494,7 @@ static int i8080_execute(int opcode) {
 
         case 0x27:            /* daa */
             cpu_cycles = 4;
-            carry = (uns8)C_FLAG;
+            carry = (u8)C_FLAG;
             add = 0;
             if (H_FLAG || (A & 0x0f) > 9) {
                 add = 0x06;
@@ -541,13 +515,13 @@ static int i8080_execute(int opcode) {
 
         case 0x2A:            /* ldhl addr */
             cpu_cycles = 16;
-            HL = RD_WORD(RD_WORD(PC));
+            SET_PAIR(H, L, RD_WORD(RD_WORD(PC)));
             PC += 2;
             break;
 
         case 0x2B:            /* dcx h */
             cpu_cycles = 5;
-            HL--;
+            SET_PAIR(H, L, HL - 1);
             break;
 
         case 0x2C:            /* inr l */
@@ -648,7 +622,7 @@ static int i8080_execute(int opcode) {
             break;
 
         case 0x40:            /* mov b, b */
-            cpu_cycles = 4;
+            cpu_cycles = 5;
             break;
 
         case 0x41:            /* mov b, c */
@@ -783,22 +757,22 @@ static int i8080_execute(int opcode) {
             cpu_cycles = 5;
             break;
 
-        case 0x5C:            /* mov c, h */
+        case 0x5C:            /* mov e, h */
             cpu_cycles = 5;
             E = H;
             break;
 
-        case 0x5D:            /* mov c, l */
+        case 0x5D:            /* mov e, l */
             cpu_cycles = 5;
             E = L;
             break;
 
-        case 0x5E:            /* mov c, m */
+        case 0x5E:            /* mov e, m */
             cpu_cycles = 7;
             E = RD_BYTE(HL);
             break;
 
-        case 0x5F:            /* mov c, a */
+        case 0x5F:            /* mov e, a */
             cpu_cycles = 5;
             E = A;
             break;
@@ -912,7 +886,7 @@ static int i8080_execute(int opcode) {
             break;
 
         case 0x76:            /* hlt */
-            cpu_cycles = 4;
+            cpu_cycles = 7;
             PC--;
             break;
 
@@ -1297,8 +1271,8 @@ static int i8080_execute(int opcode) {
             break;
 
         case 0xC1:            /* pop b */
-            cpu_cycles = 11;
-            POP(BC);
+            cpu_cycles = 10;
+            POP_PAIR(B, C);
             break;
 
         case 0xC2:            /* jnz addr */
@@ -1404,8 +1378,8 @@ static int i8080_execute(int opcode) {
             break;
 
         case 0xD1:            /* pop d */
-            cpu_cycles = 11;
-            POP(DE);
+            cpu_cycles = 10;
+            POP_PAIR(D, E);
             break;
 
         case 0xD2:            /* jnc addr */
@@ -1500,8 +1474,8 @@ static int i8080_execute(int opcode) {
             break;
 
         case 0xE1:            /* pop h */
-            cpu_cycles = 11;
-            POP(HL);
+            cpu_cycles = 10;
+            POP_PAIR(H, L);
             break;
 
         case 0xE2:            /* jpo addr */
@@ -1518,7 +1492,7 @@ static int i8080_execute(int opcode) {
             cpu_cycles = 18;
             work16 = RD_WORD(SP);
             WR_WORD(SP, HL);
-            HL = work16;
+            SET_PAIR(H, L, work16);
             break;
 
         case 0xE4:            /* cpo addr */
@@ -1572,8 +1546,8 @@ static int i8080_execute(int opcode) {
         case 0xEB:            /* xchg */
             cpu_cycles = 4;
             work16 = DE;
-            DE = HL;
-            HL = work16;
+            SET_PAIR(D, E, HL);
+            SET_PAIR(H, L, work16);
             break;
 
         case 0xEC:            /* cpe addr */
@@ -1607,8 +1581,8 @@ static int i8080_execute(int opcode) {
 
         case 0xF1:            /* pop psw */
             cpu_cycles = 10;
-            POP(AF);
-            i8080_retrieve_flags();
+            POP_PAIR(A, F);
+            i8080_retrieve_flags(cpu);
             break;
 
         case 0xF2:            /* jp addr */
@@ -1638,7 +1612,7 @@ static int i8080_execute(int opcode) {
 
         case 0xF5:            /* push psw */
             cpu_cycles = 11;
-            i8080_store_flags();
+            i8080_store_flags(cpu);
             PUSH(AF);
             break;
 
@@ -1709,58 +1683,58 @@ static int i8080_execute(int opcode) {
     return cpu_cycles;
 }
 
-int i8080_instruction(void) {
-    return i8080_execute(RD_BYTE(PC++));
+int i8080_instruction(i8080_state *cpu) {
+    return i8080_execute(cpu, RD_BYTE(PC++));
 }
 
-void i8080_jump(int addr) {
+void i8080_jump(i8080_state *cpu, int addr) {
     PC = addr & 0xffff;
 }
 
-int i8080_pc(void) {
+int i8080_pc(i8080_state *cpu) {
     return PC;
 }
 
-int i8080_regs_bc(void) {
+int i8080_regs_bc(i8080_state *cpu) {
     return BC;
 }
 
-int i8080_regs_de(void) {
+int i8080_regs_de(i8080_state *cpu) {
     return DE;
 }
 
-int i8080_regs_hl(void) {
+int i8080_regs_hl(i8080_state *cpu) {
     return HL;
 }
 
-int i8080_regs_sp(void) {
+int i8080_regs_sp(i8080_state *cpu) {
     return SP;
 }
 
-int i8080_regs_a(void) {
+int i8080_regs_a(i8080_state *cpu) {
     return A;
 }
 
-int i8080_regs_b(void) {
+int i8080_regs_b(i8080_state *cpu) {
     return B;
 }
 
-int i8080_regs_c(void) {
+int i8080_regs_c(i8080_state *cpu) {
     return C;
 }
 
-int i8080_regs_d(void) {
+int i8080_regs_d(i8080_state *cpu) {
     return D;
 }
 
-int i8080_regs_e(void) {
+int i8080_regs_e(i8080_state *cpu) {
     return E;
 }
 
-int i8080_regs_h(void) {
+int i8080_regs_h(i8080_state *cpu) {
     return H;
 }
 
-int i8080_regs_l(void) {
+int i8080_regs_l(i8080_state *cpu) {
     return L;
 }

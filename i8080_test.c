@@ -64,17 +64,18 @@ void load_file(const char *name, unsigned char *load_to)
 void execute_test(const char *filename, int success_check)
 {
     unsigned char *mem = i8080_hal_memory();
+    i8080_state cpu;
     int success = 0;
 
     memset(mem, 0, 0x10000);
     load_file(filename, mem + 0x100);
 
     mem[5] = 0xC9; // Inject RET at 0x0005 to handle "CALL 5".
-    i8080_init();
-    i8080_jump(0x100);
+    i8080_init(&cpu);
+    i8080_jump(&cpu, 0x100);
     while (1)
     {
-        int const pc = i8080_pc();
+        int const pc = i8080_pc(&cpu);
         if (mem[pc] == 0x76)
         {
             printf("HLT at %04X\n", pc);
@@ -82,18 +83,18 @@ void execute_test(const char *filename, int success_check)
         }
         if (pc == 0x0005)
         {
-            if (i8080_regs_c() == 9)
+            if (i8080_regs_c(&cpu) == 9)
             {
                 int i;
-                for (i = i8080_regs_de(); mem[i] != '$'; i += 1)
+                for (i = i8080_regs_de(&cpu); mem[i] != '$'; i += 1)
                     putchar(mem[i]);
                 success = 1;
             }
-            if (i8080_regs_c() == 2)
-                putchar((char)i8080_regs_e());
+            if (i8080_regs_c(&cpu) == 2)
+                putchar((char)i8080_regs_e(&cpu));
         }
-        i8080_instruction();
-        if (i8080_pc() == 0)
+        i8080_instruction(&cpu);
+        if (i8080_pc(&cpu) == 0)
         {
             printf("\nJump to 0000 from %04X\n", pc);
             if (success_check && !success)

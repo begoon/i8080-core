@@ -7,7 +7,7 @@ ifeq ($(OS),Windows_NT)
   CC = cl /O2 -Fe$(IMAGE).exe
 else
   RUN_PREFIX = ./
-  CC = cc -O3 -o $(IMAGE)
+  CC = cc -O3 -flto -o $(IMAGE)
 endif
 
 FILES = \

@@ -13,7 +13,7 @@
 // Ian Bartholomew, 8080/8085 CPU Exerciser
 // http://www.idb.me.uk/sunhillow/8080.html
 //
-// Frank Cringle, The origianal exerciser for the Z80.
+// Frank Cringle, The original exerciser for the Z80.
 //
 // Thanks to zx.pk.ru and nedopc.org/forum communities.
 //
@@ -34,23 +34,47 @@
 #ifndef I8080_H
 #define I8080_H
 
-extern void i8080_init(void);
-extern int i8080_instruction(void);
+typedef unsigned char  u8;
+typedef unsigned short u16;
 
-extern void i8080_jump(int addr);
-extern int i8080_pc(void);
+typedef struct {
+    u8 carry_flag;
+    u8 unused1;
+    u8 parity_flag;
+    u8 unused3;
+    u8 half_carry_flag;
+    u8 unused5;
+    u8 zero_flag;
+    u8 sign_flag;
+} i8080_flags;
 
-extern int i8080_regs_bc(void);
-extern int i8080_regs_de(void);
-extern int i8080_regs_hl(void);
-extern int i8080_regs_sp(void);
+typedef struct {
+    i8080_flags f;
+    u8 a, flags;
+    u8 b, c;
+    u8 d, e;
+    u8 h, l;
+    u16 sp, pc;
+    u16 iff;
+} i8080_state;
 
-extern int i8080_regs_a(void);
-extern int i8080_regs_b(void);
-extern int i8080_regs_c(void);
-extern int i8080_regs_d(void);
-extern int i8080_regs_e(void);
-extern int i8080_regs_h(void);
-extern int i8080_regs_l(void);
+extern void i8080_init(i8080_state *cpu);
+extern int i8080_instruction(i8080_state *cpu);
+
+extern void i8080_jump(i8080_state *cpu, int addr);
+extern int i8080_pc(i8080_state *cpu);
+
+extern int i8080_regs_bc(i8080_state *cpu);
+extern int i8080_regs_de(i8080_state *cpu);
+extern int i8080_regs_hl(i8080_state *cpu);
+extern int i8080_regs_sp(i8080_state *cpu);
+
+extern int i8080_regs_a(i8080_state *cpu);
+extern int i8080_regs_b(i8080_state *cpu);
+extern int i8080_regs_c(i8080_state *cpu);
+extern int i8080_regs_d(i8080_state *cpu);
+extern int i8080_regs_e(i8080_state *cpu);
+extern int i8080_regs_h(i8080_state *cpu);
+extern int i8080_regs_l(i8080_state *cpu);
 
 #endif
