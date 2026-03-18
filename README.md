@@ -153,9 +153,9 @@ Full test suite run time (all four tests) on Apple M1, 16 GB RAM:
 
 | Build                          | Compiler / Runtime                | Time   |
 |--------------------------------|-----------------------------------|--------|
-| Native (`-O3`)                 | Apple Clang 17.0.0               | ~16s   |
-| Native (`-O3 -flto`)           | Apple Clang 17.0.0               | ~10s   |
-| WASM (`-O3`)                   | Emscripten + Bun 1.3.10          | ~10s   |
+| Native (`-O3`)                 | Apple Clang 17.0.0                | ~16s   |
+| Native (`-O3 -flto`)            | Apple Clang 17.0.0                | ~10s   |
+| WASM (`-O3`)                   | Emscripten + Bun 1.3.10           | ~10s   |
 
 The native build without LTO is significantly slower because the HAL
 functions (`i8080_hal_memory_read_byte`, etc.) are in a separate
